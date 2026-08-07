@@ -132,17 +132,17 @@
 
   <div class="card">
     <div class="names">Cameron & Jorja</div>
-    <div class="subtitle">Wedding Photos & Videos</div>
+    <div class="subtitle">Wedding Photos</div>
     
     <div class="divider"></div>
 
-    <p>Upload your photos and clips from the day to share them directly with us!</p>
+    <p>Upload your photos from the day to share them directly with us!</p>
     
     <div class="file-input-wrapper">
       <label for="fileInput" class="custom-file-upload" id="fileLabel">
         Tap here to select photos
       </label>
-      <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+      <input type="file" id="fileInput" accept="image/*" multiple>
     </div>
 
     <button onclick="uploadFiles()">Upload Photos</button>
@@ -150,18 +150,18 @@
   </div>
 
   <script>
-    // Your pre-configured Web App URL linked to your "Jorja&Cameron" folder
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyDITfti6n6y1AJa7QGV5Z02_kJDCnCqJSfKiIVRH9KYoEbWda0xiaTXVVQ3RRhmSQUGw/exec";
 
-    document.getElementById('fileInput').addEventListener('change', function(e) {
+    const fileInput = document.getElementById('fileInput');
+
+    fileInput.addEventListener('change', function(e) {
       const count = e.target.files.length;
       document.getElementById('fileLabel').innerText = count > 0 
-        ? `${count} file(s) selected` 
+        ? `${count} photo(s) selected` 
         : 'Tap here to select photos';
     });
 
     async function uploadFiles() {
-      const fileInput = document.getElementById('fileInput');
       const status = document.getElementById('status');
       const files = fileInput.files;
 
@@ -170,41 +170,83 @@
         return;
       }
 
-      status.innerText = "Uploading... Please wait.";
+      let successCount = 0;
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        status.innerText = `Uploading file ${i + 1} of ${files.length}...`;
+
+        status.innerText = `Optimising & uploading ${i + 1} of ${files.length}...`;
 
         try {
-          const base64 = await convertToBase64(file);
+          // Compress photo locally on guest's device (converts Live Photos/HEIC to compressed JPEG)
+          const compressedBase64 = await compressPhoto(file);
+          
+          // Ensure clean .jpg extension
+          const cleanName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+
           const payload = {
-            name: file.name,
-            type: file.type,
-            base64: base64.split(',')[1]
+            name: cleanName,
+            type: "image/jpeg",
+            base64: compressedBase64.split(',')[1]
           };
 
           await fetch(SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify(payload)
           });
+
+          successCount++;
         } catch (err) {
           console.error(err);
-          status.innerText = `Error uploading ${file.name}`;
+          status.innerText = `Error uploading photo ${i + 1}`;
           return;
         }
       }
 
-      status.innerText = "Thank you! All photos uploaded successfully.";
+      status.innerText = `Success! ${successCount} photo(s) added to the album.`;
       fileInput.value = "";
       document.getElementById('fileLabel').innerText = 'Tap here to select photos';
     }
 
-    function convertToBase64(file) {
+    // Uses HTML Canvas to flatten Live Photos & scale down file sizes under 1MB
+    function compressPhoto(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
+        reader.onload = function(e) {
+          const img = new Image();
+          img.onload = function() {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            const MAX_DIM = 2000; // 2000px provides crisp print quality while keeping file size under 1MB
+
+            if (width > height) {
+              if (width > MAX_DIM) {
+                height = Math.round(height * (MAX_DIM / width));
+                width = MAX_DIM;
+              }
+            } else {
+              if (height > MAX_DIM) {
+                width = Math.round(width * (MAX_DIM / height));
+                height = MAX_DIM;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // Compress to JPEG at 85% quality
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            resolve(dataUrl);
+          };
+          img.onerror = reject;
+          img.src = e.target.result;
+        };
+        reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
