@@ -454,8 +454,17 @@ button:disabled {
   background: rgba(130, 46, 39, 0.045);
 }
 
+.upload-item.is-uncertain {
+  border-color: rgba(132, 102, 49, 0.34);
+  background: rgba(132, 102, 49, 0.055);
+}
+
 .upload-item.is-failed .upload-detail {
   color: #7a2d27;
+}
+
+.upload-item.is-uncertain .upload-detail {
+  color: #66512b;
 }
 
 .upload-name {

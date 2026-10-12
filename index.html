@@ -101,6 +101,9 @@
       uploadButton.disabled = isUploading || !fileInput.files || fileInput.files.length === 0;
       retryButton.disabled = isUploading || retryQueue.length === 0;
       retryButton.hidden = retryQueue.length === 0;
+      retryButton.textContent = retryQueue.some(record => record.status === 'uncertain')
+        ? 'Check uploads and retry'
+        : 'Try again';
     }
 
     async function uploadSelectedFiles() {
@@ -109,7 +112,13 @@
         statusElement.textContent = 'Choose a photo or video first.';
         return;
       }
-      currentBatch = files.map(file => ({ file, status: 'queued' }));
+      const uploadIds = await createUploadIds(files);
+      currentBatch = files.map((file, index) => ({
+        file,
+        uploadId: uploadIds[index].uploadId,
+        checkExisting: uploadIds[index].checkExisting,
+        status: 'queued'
+      }));
       retryQueue = [];
       batchProgress.value = 0;
       await runUploadBatch(currentBatch);
@@ -133,6 +142,7 @@
       function updateBatchStatus() {
         const added = currentBatch.filter(record => record.status === 'success').length;
         const needsRetry = currentBatch.filter(record => record.status === 'failed').length;
+        const needsCheck = currentBatch.filter(record => record.status === 'uncertain').length;
         const uploading = currentBatch.filter(record => record.status === 'uploading').length;
         const waiting = currentBatch.filter(record => record.status === 'queued').length;
         batchProgress.value = currentBatch.length ? Math.round((added / currentBatch.length) * 100) : 0;
@@ -141,6 +151,7 @@
         if (uploading) statusParts.push(`${uploading} uploading`);
         if (waiting) statusParts.push(`${waiting} waiting`);
         if (needsRetry) statusParts.push(needsRetry === 1 ? '1 file needs a retry' : `${needsRetry} files need a retry`);
+        if (needsCheck) statusParts.push(needsCheck === 1 ? '1 upload needs checking' : `${needsCheck} uploads need checking`);
         statusElement.textContent = statusParts.join(' · ');
       }
 
@@ -169,12 +180,14 @@
           const row = createUploadRow(record);
           updateBatchStatus();
           try {
-            const prepared = await prepareMedia(record.file);
+            const prepared = record.prepared || await prepareMedia(record.file);
+            record.prepared = prepared;
             record.preparedName = prepared.name;
             row.name.textContent = prepared.name;
             row.detail.textContent = `Uploading ${formatBytes(prepared.blob.size)}…`;
 
             await uploadToDrive(
+              record,
               prepared.blob,
               prepared.name,
               prepared.mimeType,
@@ -186,16 +199,20 @@
             );
 
             record.status = 'success';
+            record.prepared = null;
+            record.sessionUri = '';
             retryQueue = retryQueue.filter(item => item !== record);
             row.progress.value = 100;
             row.detail.textContent = 'It’s in the album!';
           } catch (error) {
             console.error('Upload failed:', record.file.name, error);
-            record.status = 'failed';
+            record.status = error.uncertain ? 'uncertain' : 'failed';
             record.error = error.message || 'Upload failed';
             if (!retryQueue.includes(record)) retryQueue.push(record);
-            row.element.classList.add('is-failed');
-            row.detail.textContent = `Didn’t upload: ${record.error}`;
+            row.element.classList.add(error.uncertain ? 'is-uncertain' : 'is-failed');
+            row.detail.textContent = error.uncertain
+              ? `${record.error} Don’t choose this file again yet.`
+              : `Didn’t upload: ${record.error}`;
           } finally {
             if (record.status === 'success') row.element.remove();
             updateBatchStatus();
@@ -209,10 +226,17 @@
 
       if (retryQueue.length) {
         const added = currentBatch.filter(record => record.status === 'success').length;
-        const failedCount = retryQueue.length;
+        const failedCount = retryQueue.filter(record => record.status === 'failed').length;
+        const uncertainCount = retryQueue.filter(record => record.status === 'uncertain').length;
         const fileWord = currentBatch.length === 1 ? 'file' : 'files';
-        const failedMessage = failedCount === 1 ? '1 file didn’t upload' : `${failedCount} files didn’t upload`;
-        statusElement.textContent = `${added} of ${currentBatch.length} ${fileWord} added. ${failedMessage}.`;
+        const statusParts = [`${added} of ${currentBatch.length} ${fileWord} added`];
+        if (uncertainCount) {
+          statusParts.push(`${uncertainCount} upload${uncertainCount === 1 ? '' : 's'} couldn’t be confirmed — check the album before choosing those files again`);
+        }
+        if (failedCount) {
+          statusParts.push(failedCount === 1 ? '1 file needs a retry' : `${failedCount} files need a retry`);
+        }
+        statusElement.textContent = statusParts.join('. ') + '.';
       } else {
         statusElement.textContent = currentBatch.length === 1
           ? 'Thanks — it’s in the album!'
@@ -280,10 +304,41 @@
       return types[extension] || 'application/octet-stream';
     }
 
-    async function uploadToDrive(blob, name, mimeType, onProgress, onStatus) {
-      let sessionUri = await createUploadSession(name, mimeType, blob.size);
+    async function uploadToDrive(record, blob, name, mimeType, onProgress, onStatus) {
+      let sessionUri = record.sessionUri || '';
       let offset = 0;
       let recoveryAttempts = 0;
+
+      if (sessionUri) {
+        onStatus('Checking the previous attempt before continuing…');
+        const state = await checkUploadSession(sessionUri, blob.size, record.uploadId);
+        if (state.complete) {
+          onProgress(blob.size, blob.size);
+          record.sessionUri = '';
+          return state.file || null;
+        }
+        if (state.expired) {
+          record.sessionUri = '';
+          const started = await createUploadSession(record, name, mimeType, blob.size);
+          if (started.complete) {
+            onProgress(blob.size, blob.size);
+            return started.file || null;
+          }
+          sessionUri = started.sessionUri;
+          record.sessionUri = sessionUri;
+        } else {
+          offset = state.nextOffset || 0;
+          onProgress(offset, blob.size);
+        }
+      } else {
+        const started = await createUploadSession(record, name, mimeType, blob.size);
+        if (started.complete) {
+          onProgress(blob.size, blob.size);
+          return started.file || null;
+        }
+        sessionUri = started.sessionUri;
+        record.sessionUri = sessionUri;
+      }
 
       while (offset < blob.size) {
         const end = Math.min(offset + CHUNK_SIZE, blob.size);
@@ -291,55 +346,90 @@
           const response = await putChunk(sessionUri, blob, offset, end, onProgress);
           if (response.status === 200 || response.status === 201) {
             onProgress(blob.size, blob.size);
+            record.sessionUri = '';
             return response.body;
           }
 
           offset = response.nextOffset > offset ? response.nextOffset : end;
           recoveryAttempts = 0;
           onProgress(offset, blob.size);
-        } catch (error) {
-          if (error.status === 404) {
-            // Expired sessions must be recreated; the file itself remains available in the browser.
-            sessionUri = await createUploadSession(name, mimeType, blob.size);
-            offset = 0;
-            continue;
+          if (offset >= blob.size) {
+            const state = await checkUploadSession(sessionUri, blob.size, record.uploadId);
+            if (state.complete) {
+              record.sessionUri = '';
+              return state.file || null;
+            }
+            if (state.expired) {
+              record.sessionUri = '';
+              const started = await createUploadSession(record, name, mimeType, blob.size);
+              if (started.complete) {
+                onProgress(blob.size, blob.size);
+                return started.file || null;
+              }
+              sessionUri = started.sessionUri;
+              record.sessionUri = sessionUri;
+              offset = 0;
+            } else {
+              offset = state.nextOffset || 0;
+              if (offset >= blob.size) {
+                const uncertainError = new Error('We couldn’t confirm whether this made it to the album. Check the album before choosing it again.');
+                uncertainError.uncertain = true;
+                throw uncertainError;
+              }
+            }
           }
-          if (!isRetryable(error)) throw error;
+        } catch (error) {
+          if (error.uncertain) throw error;
+          if (!isRetryable(error) && error.status !== 404) throw error;
           recoveryAttempts++;
-          if (recoveryAttempts > 4) throw new Error('The connection keeps dropping. Try again in a moment.');
           onStatus('The connection dropped. Checking what got through…');
           await wait(500 * recoveryAttempts);
 
-          try {
-            const state = await queryUploadSession(sessionUri, blob.size);
-            if (state.complete) {
+          const state = await checkUploadSession(sessionUri, blob.size, record.uploadId);
+          if (state.complete) {
+            onProgress(blob.size, blob.size);
+            record.sessionUri = '';
+            return state.file || null;
+          }
+          if (state.expired) {
+            record.sessionUri = '';
+            const started = await createUploadSession(record, name, mimeType, blob.size);
+            if (started.complete) {
               onProgress(blob.size, blob.size);
-              return state.body;
+              return started.file || null;
             }
-            offset = state.nextOffset;
-          } catch (statusError) {
-            if (statusError.status === 404) {
-              sessionUri = await createUploadSession(name, mimeType, blob.size);
-              offset = 0;
-            } else {
-              throw statusError;
-            }
+            sessionUri = started.sessionUri;
+            record.sessionUri = sessionUri;
+            offset = 0;
+          } else {
+            offset = state.nextOffset || 0;
+          }
+          if (recoveryAttempts > 4) {
+            throw new Error('The connection keeps dropping. Try again in a moment.');
           }
         }
       }
     }
 
-    async function createUploadSession(name, mimeType, size) {
+    async function createUploadSession(record, name, mimeType, size) {
       const response = await fetch(SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-        body: JSON.stringify({ action: 'initiateUpload', name, mimeType, size })
+        body: JSON.stringify({
+          action: 'initiateUpload',
+          uploadId: record.uploadId,
+          checkExisting: Boolean(record.checkExisting),
+          name,
+          mimeType,
+          size
+        })
       });
       const result = await response.json();
-      if (!response.ok || result.result !== 'success' || !result.sessionUri) {
+      if (!response.ok || result.result !== 'success' || (!result.complete && !result.sessionUri)) {
         throw new Error(result.error || 'We couldn’t start the upload. Try again.');
       }
-      return result.sessionUri;
+      record.checkExisting = true;
+      return result;
     }
 
     function putChunk(sessionUri, file, start, end, onProgress) {
@@ -366,23 +456,87 @@
       });
     }
 
-    function queryUploadSession(sessionUri, size) {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', sessionUri, true);
-        xhr.setRequestHeader('Content-Range', `bytes */${size}`);
-        xhr.onload = () => {
-          if (xhr.status === 200 || xhr.status === 201) {
-            resolve({ complete: true, body: parseJsonResponse(xhr.responseText) });
-          } else if (xhr.status === 308) {
-            resolve({ complete: false, nextOffset: getNextOffset(xhr, 0) });
-          } else {
-            reject(makeUploadError(xhr));
+    async function checkUploadSession(sessionUri, size, uploadId) {
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify({ action: 'checkUpload', sessionUri, uploadId, size }),
+          cache: 'no-store'
+        });
+        const result = await response.json();
+        if (!response.ok || result.result !== 'success') {
+          const unsupported = /unsupported request/i.test(result.error || '');
+          const message = unsupported
+            ? 'The upload checker needs its Apps Script update. The file may already be in the album; check there before choosing it again.'
+            : 'We couldn’t confirm whether this made it to the album. Check the album before choosing it again.';
+          const error = new Error(message);
+          error.uncertain = true;
+          throw error;
+        }
+        return result;
+      } catch (error) {
+        if (error.uncertain) throw error;
+        const uncertainError = new Error('We couldn’t confirm whether this made it to the album. Check the album before choosing it again.');
+        uncertainError.uncertain = true;
+        uncertainError.cause = error;
+        throw uncertainError;
+      }
+    }
+
+    async function createUploadIds(files) {
+      const sessionId = getUploadSessionId();
+      const occurrences = new Map();
+      return Promise.all(files.map(async file => {
+        const fingerprint = `${file.name}\u0000${file.size}\u0000${file.lastModified}\u0000${file.type}`;
+        const occurrence = occurrences.get(fingerprint) || 0;
+        occurrences.set(fingerprint, occurrence + 1);
+        const seed = `${sessionId}\u0000${fingerprint}\u0000${occurrence}`;
+        let uploadId;
+        try {
+          if (window.crypto && crypto.subtle && window.TextEncoder) {
+            const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(seed));
+            uploadId = Array.from(new Uint8Array(digest).slice(0, 16), byte => byte.toString(16).padStart(2, '0')).join('');
           }
-        };
-        xhr.onerror = () => reject(new Error('Can’t check this upload just now. Try again when you’re back online.'));
-        xhr.send(null);
-      });
+        } catch (error) {
+          console.info('Using a temporary upload reference for this file.');
+        }
+        uploadId = uploadId || makeRandomUploadId();
+        return { uploadId, checkExisting: registerUploadId(uploadId) };
+      }));
+    }
+
+    function registerUploadId(uploadId) {
+      const key = `camjorja-upload-started-${uploadId}`;
+      try {
+        const wasUsed = sessionStorage.getItem(key) === '1';
+        sessionStorage.setItem(key, '1');
+        return wasUsed;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    let uploadSessionId;
+    function getUploadSessionId() {
+      if (uploadSessionId) return uploadSessionId;
+      try {
+        uploadSessionId = sessionStorage.getItem('camjorja-upload-session-id');
+        if (!uploadSessionId) {
+          uploadSessionId = makeRandomUploadId();
+          sessionStorage.setItem('camjorja-upload-session-id', uploadSessionId);
+        }
+      } catch (error) {
+        uploadSessionId = makeRandomUploadId();
+      }
+      return uploadSessionId;
+    }
+
+    function makeRandomUploadId() {
+      const bytes = new Uint8Array(16);
+      if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(bytes);
+      else for (let index = 0; index < bytes.length; index++) bytes[index] = Math.floor(Math.random() * 256);
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('');
     }
 
     function getNextOffset(xhr, fallback) {
