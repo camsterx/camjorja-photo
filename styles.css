@@ -404,6 +404,34 @@ button:disabled {
   line-height: 1.6;
 }
 
+#status.is-waiting-for-media {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+#status.is-waiting-for-media::before {
+  width: 13px;
+  height: 13px;
+  flex: 0 0 13px;
+  margin-top: 2px;
+  border: 2px solid rgba(10, 31, 68, 0.2);
+  border-top-color: var(--navy);
+  border-radius: 50%;
+  animation: media-ready-spin 850ms linear infinite;
+  content: '';
+}
+
+@keyframes media-ready-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #status.is-waiting-for-media::before {
+    animation: none;
+  }
+}
+
 #batchProgress {
   display: block;
   width: 100%;

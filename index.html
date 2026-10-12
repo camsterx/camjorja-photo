@@ -43,7 +43,7 @@
           </span>
           <span class="upload-copy">
             <span id="selectionLabel" aria-live="polite" aria-atomic="true">Choose photos and videos</span>
-            <span class="upload-subtext">Choose from your phone or computer</span>
+            <span class="upload-subtext" id="uploadSubtext">Larger videos can take a moment to appear here.</span>
           </span>
           <span class="upload-chevron" aria-hidden="true">›</span>
         </label>
@@ -67,6 +67,8 @@
 
     const fileInput = document.getElementById('fileInput');
     const selectionLabel = document.getElementById('selectionLabel');
+    const uploadSubtext = document.getElementById('uploadSubtext');
+    const defaultUploadSubtext = uploadSubtext.textContent;
     const uploadButton = document.getElementById('uploadButton');
     const retryButton = document.getElementById('retryButton');
     const statusElement = document.getElementById('status');
@@ -76,9 +78,44 @@
     let currentBatch = [];
     let isUploading = false;
 
-    fileInput.addEventListener('change', updateSelection);
+    fileInput.addEventListener('click', handlePickerOpening);
+    fileInput.addEventListener('change', handleFileSelection);
+    fileInput.addEventListener('cancel', handlePickerCancelled);
     uploadButton.addEventListener('click', uploadSelectedFiles);
     retryButton.addEventListener('click', retryFailedFiles);
+
+    function setStatus(message, isWaitingForMedia = false) {
+      statusElement.textContent = message;
+      statusElement.classList.toggle('is-waiting-for-media', isWaitingForMedia);
+    }
+
+    function handlePickerOpening() {
+      if (isUploading) return;
+      uploadSubtext.textContent = 'After you finish choosing, larger videos can take a little longer to appear here.';
+      setStatus('Your device is preparing your photos and videos. Larger videos can take a little longer.', true);
+    }
+
+    function handlePickerCancelled() {
+      uploadSubtext.textContent = defaultUploadSubtext;
+      updateSelection();
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        setStatus('');
+        return;
+      }
+      setStatus(`${files.length} file${files.length === 1 ? '' : 's'} still selected. Tap “Add to our wedding album” to upload.`);
+    }
+
+    function handleFileSelection() {
+      uploadSubtext.textContent = defaultUploadSubtext;
+      updateSelection();
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        setStatus('');
+        return;
+      }
+      setStatus(`${files.length} file${files.length === 1 ? '' : 's'} ready. Tap “Add to our wedding album” to upload.`);
+    }
 
     function updateSelection() {
       const files = Array.from(fileInput.files || []);
