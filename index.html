@@ -3,252 +3,421 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Share Your Moments - Cameron & Jorja</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cinzel:wght@400;600;700&family=Montserrat:wght@300;400;500;600&display=swap');
-
-    :root {
-      --outer-bg: #0A1F44;            
-      --card-pastel-yellow: #FAF0D7;  
-      --navy-blue: #0A1F44;          
-      --border-navy: #122B5C;
-    }
-
-    body {
-      margin: 0;
-      padding: 20px;
-      background-color: var(--outer-bg);
-      font-family: 'Cinzel', serif;
-      color: var(--navy-blue);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .card {
-      background-color: var(--card-pastel-yellow);
-      border: 2px solid var(--border-navy);
-      border-radius: 8px;
-      padding: 40px 30px;
-      max-width: 420px;
-      width: 100%;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      box-sizing: border-box;
-    }
-
-    .names {
-      font-family: 'Alex Brush', cursive;
-      font-size: 3.2rem;
-      color: var(--navy-blue);
-      margin: 0 0 5px 0;
-      line-height: 1.1;
-    }
-
-    .subtitle {
-      font-size: 0.8rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--navy-blue);
-      margin-bottom: 20px;
-    }
-
-    p {
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.9rem;
-      color: var(--navy-blue);
-      line-height: 1.5;
-      margin-bottom: 25px;
-    }
-
-    .divider {
-      width: 60%;
-      height: 1px;
-      background-color: var(--navy-blue);
-      margin: 15px auto 25px auto;
-    }
-
-    .file-input-wrapper {
-      margin-bottom: 20px;
-    }
-
-    input[type="file"] {
-      display: none;
-    }
-
-    .custom-file-upload {
-      border: 2px dashed var(--navy-blue);
-      display: block;
-      padding: 22px 15px;
-      cursor: pointer;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.4);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.95rem;
-      color: var(--navy-blue);
-      transition: background 0.3s, border-color 0.3s;
-    }
-
-    .custom-file-upload:hover {
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    button {
-      background-color: var(--navy-blue);
-      color: var(--card-pastel-yellow);
-      border: 2px solid var(--navy-blue);
-      padding: 14px 30px;
-      font-family: 'Cinzel', serif;
-      font-size: 0.95rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 600;
-      border-radius: 4px;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 6px rgba(10, 31, 68, 0.15);
-    }
-
-    button:hover {
-      background-color: var(--card-pastel-yellow);
-      color: var(--navy-blue);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(10, 31, 68, 0.2);
-    }
-
-    #status {
-      margin-top: 20px;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 0.85rem;
-      color: var(--navy-blue);
-      font-weight: 500;
-    }
-  </style>
+  <title>Jorja &amp; Cameron | Wedding Photo &amp; Video Album</title>
+  <meta name="description" content="Add your wedding photos and videos to Jorja and Cameron’s album.">
+  <meta name="theme-color" content="#0A1F44">
+  <link rel="icon" href="assets/cj-wreath.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Montserrat:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="card">
-    <div class="names">Cameron & Jorja</div>
-    <div class="subtitle">Wedding Photos</div>
-    
-    <div class="divider"></div>
+  <main class="album-page">
+    <section class="welcome-panel" aria-labelledby="coupleNames">
+      <img class="floral-art floral-art-top" src="assets/invitation-roses.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
+      <img class="floral-art floral-art-bottom" src="assets/invitation-roses.png" alt="" aria-hidden="true" fetchpriority="low" decoding="async">
+      <div class="welcome-content">
+        <div class="monogram" aria-hidden="true">
+          <img src="assets/cj-wreath.svg" alt="">
+          <span>J&amp;C</span>
+        </div>
+        <p class="eyebrow">The wedding of</p>
+        <h1 class="names" id="coupleNames">Jorja <span>&amp;</span> Cameron</h1>
+        <p class="event-date"><span>Thursday</span><i aria-hidden="true"></i>10 June 2027</p>
+        <div class="divider" aria-hidden="true"><span>✦</span></div>
+        <p class="welcome-message">Thanks for <em>coming to our wedding!</em></p>
+      </div>
+    </section>
 
-    <p>Upload your photos from the day to share them directly with us!</p>
-    
-    <div class="file-input-wrapper">
-      <label for="fileInput" class="custom-file-upload" id="fileLabel">
-        Tap here to select photos
-      </label>
-      <input type="file" id="fileInput" accept="image/*" multiple>
-    </div>
+    <section class="upload-panel" aria-labelledby="uploadHeading">
+      <p class="section-kicker">Our wedding album</p>
+      <h2 id="uploadHeading">Share your photos <span>&amp; videos</span></h2>
+      <p class="upload-intro">Got any photos or videos from the day? We’d love to see them.</p>
 
-    <button onclick="uploadFiles()">Upload Photos</button>
-    <div id="status"></div>
-  </div>
+      <div class="file-input-wrapper">
+        <label for="fileInput" class="custom-file-upload" id="fileLabel">
+          <span class="upload-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M5 14v4.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V14"/></svg>
+          </span>
+          <span class="upload-copy">
+            <span id="selectionLabel" aria-live="polite" aria-atomic="true">Choose photos and videos</span>
+            <span class="upload-subtext">Choose from your phone or computer</span>
+          </span>
+          <span class="upload-chevron" aria-hidden="true">›</span>
+        </label>
+        <input type="file" id="fileInput" accept="image/*,video/*" multiple>
+      </div>
+
+      <button id="uploadButton" type="button" disabled>Add to our wedding album</button>
+      <button id="retryButton" type="button" hidden>Try again</button>
+      <div id="status" role="status" aria-live="polite"></div>
+      <progress id="batchProgress" max="100" value="0" hidden aria-label="Files added to the album"></progress>
+      <div id="activeUploads" aria-live="off"></div>
+    </section>
+  </main>
 
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyDITfti6n6y1AJa7QGV5Z02_kJDCnCqJSfKiIVRH9KYoEbWda0xiaTXVVQ3RRhmSQUGw/exec";
+    const MAX_PARALLEL_UPLOADS = 4;
+    const CHUNK_SIZE = 8 * 1024 * 1024;
+    const MAX_PHOTO_DIMENSION = 2000;
+    const PHOTO_JPEG_QUALITY = 0.84;
 
     const fileInput = document.getElementById('fileInput');
+    const selectionLabel = document.getElementById('selectionLabel');
+    const uploadButton = document.getElementById('uploadButton');
+    const retryButton = document.getElementById('retryButton');
+    const statusElement = document.getElementById('status');
+    const batchProgress = document.getElementById('batchProgress');
+    const activeUploads = document.getElementById('activeUploads');
+    let retryQueue = [];
+    let currentBatch = [];
+    let isUploading = false;
 
-    fileInput.addEventListener('change', function(e) {
-      const count = e.target.files.length;
-      document.getElementById('fileLabel').innerText = count > 0 
-        ? `${count} photo(s) selected` 
-        : 'Tap here to select photos';
-    });
+    fileInput.addEventListener('change', updateSelection);
+    uploadButton.addEventListener('click', uploadSelectedFiles);
+    retryButton.addEventListener('click', retryFailedFiles);
 
-    async function uploadFiles() {
-      const status = document.getElementById('status');
-      const files = fileInput.files;
+    function updateSelection() {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        selectionLabel.textContent = 'Choose photos and videos';
+      } else {
+        const photos = files.filter(file => getMimeType(file).startsWith('image/')).length;
+        const videos = files.length - photos;
+        const parts = [];
+        if (photos) parts.push(`${photos} photo${photos === 1 ? '' : 's'}`);
+        if (videos) parts.push(`${videos} video${videos === 1 ? '' : 's'}`);
+        selectionLabel.textContent = `${files.length} file${files.length === 1 ? '' : 's'} selected (${parts.join(', ')})`;
+      }
+      updateControls();
+    }
 
-      if (files.length === 0) {
-        status.innerText = "Please select at least one photo first.";
+    function updateControls() {
+      fileInput.disabled = isUploading;
+      fileInput.parentElement.classList.toggle('is-disabled', isUploading);
+      uploadButton.disabled = isUploading || !fileInput.files || fileInput.files.length === 0;
+      retryButton.disabled = isUploading || retryQueue.length === 0;
+      retryButton.hidden = retryQueue.length === 0;
+    }
+
+    async function uploadSelectedFiles() {
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        statusElement.textContent = 'Choose a photo or video first.';
         return;
       }
+      currentBatch = files.map(file => ({ file, status: 'queued' }));
+      retryQueue = [];
+      batchProgress.value = 0;
+      await runUploadBatch(currentBatch);
+      fileInput.value = '';
+      updateSelection();
+    }
 
-      let successCount = 0;
+    async function retryFailedFiles() {
+      const pending = retryQueue.slice();
+      if (pending.length) await runUploadBatch(pending);
+    }
 
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+    async function runUploadBatch(records) {
+      if (isUploading) return;
+      isUploading = true;
+      updateControls();
+      activeUploads.replaceChildren();
+      batchProgress.hidden = false;
+      let nextIndex = 0;
 
-        status.innerText = `Optimising & uploading ${i + 1} of ${files.length}...`;
+      function updateBatchStatus() {
+        const added = currentBatch.filter(record => record.status === 'success').length;
+        const needsRetry = currentBatch.filter(record => record.status === 'failed').length;
+        const uploading = currentBatch.filter(record => record.status === 'uploading').length;
+        const waiting = currentBatch.filter(record => record.status === 'queued').length;
+        batchProgress.value = currentBatch.length ? Math.round((added / currentBatch.length) * 100) : 0;
+        const fileWord = currentBatch.length === 1 ? 'file' : 'files';
+        const statusParts = [`${added} of ${currentBatch.length} ${fileWord} added`];
+        if (uploading) statusParts.push(`${uploading} uploading`);
+        if (waiting) statusParts.push(`${waiting} waiting`);
+        if (needsRetry) statusParts.push(needsRetry === 1 ? '1 file needs a retry' : `${needsRetry} files need a retry`);
+        statusElement.textContent = statusParts.join(' · ');
+      }
 
-        try {
-          // Compress photo locally on guest's device (converts Live Photos/HEIC to compressed JPEG)
-          const compressedBase64 = await compressPhoto(file);
-          
-          // Ensure clean .jpg extension
-          const cleanName = file.name.replace(/\.[^/.]+$/, "") + ".jpg";
+      function createUploadRow(record) {
+        const row = document.createElement('div');
+        row.className = 'upload-item';
+        const name = document.createElement('div');
+        name.className = 'upload-name';
+        name.textContent = record.preparedName || record.file.name;
+        const progress = document.createElement('progress');
+        progress.max = 100;
+        progress.value = 0;
+        progress.setAttribute('aria-label', `${record.file.name} upload progress`);
+        const detail = document.createElement('div');
+        detail.className = 'upload-detail';
+        detail.textContent = 'Preparing…';
+        row.append(name, progress, detail);
+        activeUploads.appendChild(row);
+        return { element: row, name, progress, detail };
+      }
 
-          const payload = {
-            name: cleanName,
-            type: "image/jpeg",
-            base64: compressedBase64.split(',')[1]
-          };
+      async function worker() {
+        while (nextIndex < records.length) {
+          const record = records[nextIndex++];
+          record.status = 'uploading';
+          const row = createUploadRow(record);
+          updateBatchStatus();
+          try {
+            const prepared = await prepareMedia(record.file);
+            record.preparedName = prepared.name;
+            row.name.textContent = prepared.name;
+            row.detail.textContent = `Uploading ${formatBytes(prepared.blob.size)}…`;
 
-          await fetch(SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
+            await uploadToDrive(
+              prepared.blob,
+              prepared.name,
+              prepared.mimeType,
+              (loaded, total) => {
+                row.progress.value = total ? Math.min(100, (loaded / total) * 100) : 0;
+                row.detail.textContent = `Uploading ${formatBytes(loaded)} of ${formatBytes(total)} (${Math.floor(row.progress.value)}%)`;
+              },
+              message => { row.detail.textContent = message; }
+            );
 
-          successCount++;
-        } catch (err) {
-          console.error(err);
-          status.innerText = `Error uploading photo ${i + 1}`;
-          return;
+            record.status = 'success';
+            retryQueue = retryQueue.filter(item => item !== record);
+            row.progress.value = 100;
+            row.detail.textContent = 'It’s in the album!';
+          } catch (error) {
+            console.error('Upload failed:', record.file.name, error);
+            record.status = 'failed';
+            record.error = error.message || 'Upload failed';
+            if (!retryQueue.includes(record)) retryQueue.push(record);
+            row.element.classList.add('is-failed');
+            row.detail.textContent = `Didn’t upload: ${record.error}`;
+          } finally {
+            if (record.status === 'success') row.element.remove();
+            updateBatchStatus();
+          }
         }
       }
 
-      status.innerText = `Success! ${successCount} photo(s) added to the album.`;
-      fileInput.value = "";
-      document.getElementById('fileLabel').innerText = 'Tap here to select photos';
+      await Promise.all(Array.from({ length: Math.min(MAX_PARALLEL_UPLOADS, records.length) }, () => worker()));
+      isUploading = false;
+      updateControls();
+
+      if (retryQueue.length) {
+        const added = currentBatch.filter(record => record.status === 'success').length;
+        const failedCount = retryQueue.length;
+        const fileWord = currentBatch.length === 1 ? 'file' : 'files';
+        const failedMessage = failedCount === 1 ? '1 file didn’t upload' : `${failedCount} files didn’t upload`;
+        statusElement.textContent = `${added} of ${currentBatch.length} ${fileWord} added. ${failedMessage}.`;
+      } else {
+        statusElement.textContent = currentBatch.length === 1
+          ? 'Thanks — it’s in the album!'
+          : 'Thanks — all your photos and videos are in the album!';
+      }
     }
 
-    // Uses HTML Canvas to flatten Live Photos & scale down file sizes under 1MB
-    function compressPhoto(file) {
+    async function prepareMedia(file) {
+      const originalMimeType = getMimeType(file);
+      if (!originalMimeType.startsWith('image/') || originalMimeType === 'image/gif' || originalMimeType === 'image/svg+xml') {
+        return { blob: file, name: file.name, mimeType: originalMimeType };
+      }
+
+      try {
+        const image = await loadImage(file);
+        const longestSide = Math.max(image.naturalWidth, image.naturalHeight);
+        const scale = Math.min(1, MAX_PHOTO_DIMENSION / longestSide);
+        const width = Math.max(1, Math.round(image.naturalWidth * scale));
+        const height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) throw new Error('Photo optimisation is not supported by this browser.');
+        context.fillStyle = '#fff';
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(result => result ? resolve(result) : reject(new Error('Could not optimise this photo.')), 'image/jpeg', PHOTO_JPEG_QUALITY);
+        });
+        const name = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+        return { blob, name, mimeType: blob.type || 'image/jpeg' };
+      } catch (error) {
+        // If the phone browser cannot decode a format such as HEIC, keep and upload the original.
+        console.info('Keeping the original image format:', file.name, error);
+        return { blob: file, name: file.name, mimeType: originalMimeType };
+      }
+    }
+
+    function loadImage(file) {
       return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const img = new Image();
-          img.onload = function() {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-            
-            const MAX_DIM = 2000; // 2000px provides crisp print quality while keeping file size under 1MB
-
-            if (width > height) {
-              if (width > MAX_DIM) {
-                height = Math.round(height * (MAX_DIM / width));
-                width = MAX_DIM;
-              }
-            } else {
-              if (height > MAX_DIM) {
-                width = Math.round(width * (MAX_DIM / height));
-                height = MAX_DIM;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-
-            // Compress to JPEG at 85% quality
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-            resolve(dataUrl);
-          };
-          img.onerror = reject;
-          img.src = e.target.result;
+        const objectUrl = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(image);
         };
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+        image.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('This image format could not be decoded.'));
+        };
+        image.src = objectUrl;
       });
+    }
+
+    function getMimeType(file) {
+      if (file.type) return file.type.toLowerCase();
+      const extension = file.name.split('.').pop().toLowerCase();
+      const types = {
+        jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', gif: 'image/gif', webp: 'image/webp',
+        heic: 'image/heic', heif: 'image/heif', tif: 'image/tiff', tiff: 'image/tiff',
+        mp4: 'video/mp4', m4v: 'video/x-m4v', mov: 'video/quicktime', webm: 'video/webm', '3gp': 'video/3gpp'
+      };
+      return types[extension] || 'application/octet-stream';
+    }
+
+    async function uploadToDrive(blob, name, mimeType, onProgress, onStatus) {
+      let sessionUri = await createUploadSession(name, mimeType, blob.size);
+      let offset = 0;
+      let recoveryAttempts = 0;
+
+      while (offset < blob.size) {
+        const end = Math.min(offset + CHUNK_SIZE, blob.size);
+        try {
+          const response = await putChunk(sessionUri, blob, offset, end, onProgress);
+          if (response.status === 200 || response.status === 201) {
+            onProgress(blob.size, blob.size);
+            return response.body;
+          }
+
+          offset = response.nextOffset > offset ? response.nextOffset : end;
+          recoveryAttempts = 0;
+          onProgress(offset, blob.size);
+        } catch (error) {
+          if (error.status === 404) {
+            // Expired sessions must be recreated; the file itself remains available in the browser.
+            sessionUri = await createUploadSession(name, mimeType, blob.size);
+            offset = 0;
+            continue;
+          }
+          if (!isRetryable(error)) throw error;
+          recoveryAttempts++;
+          if (recoveryAttempts > 4) throw new Error('The connection keeps dropping. Try again in a moment.');
+          onStatus('The connection dropped. Checking what got through…');
+          await wait(500 * recoveryAttempts);
+
+          try {
+            const state = await queryUploadSession(sessionUri, blob.size);
+            if (state.complete) {
+              onProgress(blob.size, blob.size);
+              return state.body;
+            }
+            offset = state.nextOffset;
+          } catch (statusError) {
+            if (statusError.status === 404) {
+              sessionUri = await createUploadSession(name, mimeType, blob.size);
+              offset = 0;
+            } else {
+              throw statusError;
+            }
+          }
+        }
+      }
+    }
+
+    async function createUploadSession(name, mimeType, size) {
+      const response = await fetch(SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({ action: 'initiateUpload', name, mimeType, size })
+      });
+      const result = await response.json();
+      if (!response.ok || result.result !== 'success' || !result.sessionUri) {
+        throw new Error(result.error || 'We couldn’t start the upload. Try again.');
+      }
+      return result.sessionUri;
+    }
+
+    function putChunk(sessionUri, file, start, end, onProgress) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', sessionUri, true);
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.setRequestHeader('Content-Range', `bytes ${start}-${end - 1}/${file.size}`);
+        xhr.upload.onprogress = event => {
+          if (event.lengthComputable) onProgress(start + event.loaded, file.size);
+        };
+        xhr.onload = () => {
+          if (xhr.status === 308) {
+            resolve({ status: 308, nextOffset: getNextOffset(xhr, start) });
+          } else if (xhr.status === 200 || xhr.status === 201) {
+            resolve({ status: xhr.status, body: parseJsonResponse(xhr.responseText) });
+          } else {
+            reject(makeUploadError(xhr));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Connection lost while uploading.'));
+        xhr.onabort = () => reject(new Error('The upload stopped.'));
+        xhr.send(file.slice(start, end));
+      });
+    }
+
+    function queryUploadSession(sessionUri, size) {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', sessionUri, true);
+        xhr.setRequestHeader('Content-Range', `bytes */${size}`);
+        xhr.onload = () => {
+          if (xhr.status === 200 || xhr.status === 201) {
+            resolve({ complete: true, body: parseJsonResponse(xhr.responseText) });
+          } else if (xhr.status === 308) {
+            resolve({ complete: false, nextOffset: getNextOffset(xhr, 0) });
+          } else {
+            reject(makeUploadError(xhr));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Can’t check this upload just now. Try again when you’re back online.'));
+        xhr.send(null);
+      });
+    }
+
+    function getNextOffset(xhr, fallback) {
+      const range = xhr.getResponseHeader('Range');
+      const match = range && range.match(/bytes=0-(\d+)/i);
+      return match ? Number(match[1]) + 1 : fallback;
+    }
+
+    function makeUploadError(xhr) {
+      const response = parseJsonResponse(xhr.responseText);
+      const message = response && response.error && response.error.message
+        ? response.error.message
+        : 'Google Drive couldn’t save this file.';
+      const error = new Error(message);
+      error.status = xhr.status;
+      return error;
+    }
+
+    function parseJsonResponse(text) {
+      try { return text ? JSON.parse(text) : null; } catch (error) { return null; }
+    }
+
+    function isRetryable(error) {
+      return !error.status || error.status === 429 || error.status >= 500;
+    }
+
+    function wait(milliseconds) {
+      return new Promise(resolve => setTimeout(resolve, milliseconds));
+    }
+
+    function formatBytes(bytes) {
+      if (!bytes) return '0 B';
+      const units = ['B', 'KB', 'MB', 'GB'];
+      const index = Math.min(Math.floor(Math.log(bytes) / Math.log(1024)), units.length - 1);
+      return `${(bytes / Math.pow(1024, index)).toFixed(index ? 1 : 0)} ${units[index]}`;
     }
   </script>
 </body>
